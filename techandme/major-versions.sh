@@ -4,43 +4,34 @@
 #
 # Tested on Ubuntu Server 16.04.
 #
-SCRIPTS=/var/scripts
-mkdir -p $SCRIPTS
-
-# ownCloud or nextcloud file?
-echo
-echo "Is this for owncloud or nextcloud?"
-echo "Please use exact name and small letters."
-echo "I use (owncloud or nextcloud):"
-read CLOUD
-
-if [ $CLOUD == "nextcloud" ]
-then
-sed "s|download.owncloud.org/community|download.nextcloud.com/releases|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-sed "s|https://raw.githubusercontent.com/techandme/owncloud-vm/master/static|https://raw.githubusercontent.com/nextcloud/vm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-else
-sed "s|https://github.com/nextcloud/vm/issues|https://github.com/enoch85/scripts/issues|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-fi
-
-#---------------------------------------------------------------------------------------------------#
+CLOUD=owncloud
 # Put your theme name here:
 THEME_NAME=""
+
+# Wich version?
+echo "Which version do you wan to upgrade to?"
+echo "Example: 8.2.10"
+read NCVERSION
 
 # Directories
 HTML=/var/www
 NCPATH=$HTML/$CLOUD
 BACKUP=/var/CLOUD_BACKUP
+SCRIPTS=/var/scripts
 
 #Static Values
 STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
-NCREPO="https://download.owncloud.org/community"
+NCREPO="https://download.owncloud.org/download/repositories/$NCVERSION/Ubuntu_16.04"
 SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
+
 # Versions
 CURRENTVERSION=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
 #---------------------------------------------------------------------------------------------------#
 
 # Must be root
 [[ `id -u` -eq 0 ]] || { echo "Must be root to run script, in Ubuntu type: sudo -i"; exit 1; }
+
+mkdir -p $SCRIPTS
 
 # Set secure permissions
 FILE="$SECURE"
@@ -52,11 +43,6 @@ else
     wget -q $STATIC/setup_secure_permissions_$CLOUD.sh -P $SCRIPTS
     chmod +x $SECURE
 fi
-
-# Wich version?
-echo "Which version do you wan to upgrade to?"
-echo "Example: 8.0.16"
-read NCVERSION
 
 # Upgrade $CLOUD
 echo "Checking latest released version on the download server and if it's possible to download..."
