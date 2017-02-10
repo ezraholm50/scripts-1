@@ -16,8 +16,8 @@ read CLOUD
 
 if [ $CLOUD == "nextcloud" ]
 then
-sed "s|https://download.owncloud.org/community|https://download.nextcloud.com/releases|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloud/vm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+sed "s|download.owncloud.org/community|download.nextcloud.com/releases|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+sed "s|https://raw.githubusercontent.com/techandme/owncloud-vm/master/static|https://raw.githubusercontent.com/nextcloud/vm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 else
 sed "s|https://github.com/nextcloud/vm/issues|https://github.com/enoch85/scripts/issues|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 fi
@@ -110,6 +110,7 @@ then
 fi
   if [ -d $DATAFOLDER ]
   then
+  mkdir -p $BACKUP/data
   mv $DATAFOLDER $BACKUP/data
   fi
 rsync -Aax $NCPATH/config $BACKUP
