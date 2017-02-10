@@ -11,12 +11,13 @@ mkdir -p $SCRIPTS
 echo
 echo "Is this for owncloud or nextcloud?"
 echo "Please use exact name and small letters."
-echo "I use (owncloud or nextcloud):" && read CLOUD
+echo "I use (owncloud or nextcloud):"
+read CLOUD
 
 if [ $CLOUD == "nextcloud" ]
 then
 sed "s|https://download.owncloud.org/community/|https://download.nextcloud.com/releases/|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloudvm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloud/vm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 fi
 if [ $CLOUD == "owncloud" ]
 then
