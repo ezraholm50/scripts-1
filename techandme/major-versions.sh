@@ -21,7 +21,7 @@ SCRIPTS=/var/scripts
 
 #Static Values
 STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
-NCREPO="https://download.owncloud.org/download/repositories/$NCVERSION/Ubuntu_16.04"
+NCREPO="https://download.owncloud.org/community"
 SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
 
 # Versions
@@ -67,10 +67,10 @@ echo -e "\e[0m"
 function version_gt() { local v1 v2 IFS=.; read -ra v1 <<< "$1"; read -ra v2 <<< "$2"; printf -v v1 %03d "${v1[@]}"; printf -v v2 %03d "${v2[@]}"; [[ $v1 > $v2 ]]; }
 if version_gt "$NCVERSION" "$CURRENTVERSION"
 then
-    echo "Latest version is: $NCVERSION. Current version is: $CURRENTVERSION."
+    echo "New version is: $NCVERSION. Current version is: $CURRENTVERSION."
     echo -e "\e[32mNew version available! Upgrade continues...\e[0m"
 else
-    echo "Latest version is: $NCVERSION. Current version is: $CURRENTVERSION."
+    echo "New version: $NCVERSION. Current version is: $CURRENTVERSION."
     echo "No need to upgrade, this script will exit..."
     exit 0
 fi
@@ -82,9 +82,10 @@ sleep 10
 DATAFOLDER=$NCPATH/data
 echo "We will now backup the config files, themes folder, and apps folder of $CLOUD to $BACKUP."
 echo "We will also move the $DATAFOLDER to $BACKUP/data if it exists."
-echo "If the data folder is not in $DATAFOLDER but still in root of $CLOUD - **PLEASE MOVE IT NOW** We will delete $NCPATH/* in the next step."
+echo "If the data folder is not in $DATAFOLDER but still in root of $CLOUD - **PLEASE MOVE IT NOW** -"
+echo "We will delete $NCPATH/* in the next step."
 echo -e "\e[32m"
-read -p "Press any key when the data is moved outside of $NCPATH root..." -n1 -s
+read -p "Press any key when the data is moved outside of $NCPATH root... Press CTRL+C to abort." -n1 -s
 echo -e "\e[0m"
 DATE=`date +%Y-%m-%d-%H%M%S`
 if [ -d $BACKUP ]
@@ -137,13 +138,13 @@ else
     exit 1
 fi
 
-if [ -d $BACKUP/data/ ]
+if [ -d $BACKUP/data ]
 then
-    echo "$BACKUP/data/ exists"
+    echo "$BACKUP/data exists"
 else
-    echo "We could not find $BACKUP/data/ are you sure you moved it outside $NCPATH?"
+    echo "We could not find $BACKUP/data are you sure you moved your data folder outside $NCPATH?"
     echo -e "\e[32m"
-    read -p "Press any key if you moved your $CLOUD data away from $NCPATH." -n1 -s
+    read -p "Press any key if you moved your $CLOUD data away from $NCPATH. Press CTRL+C to abort." -n1 -s
     echo -e "\e[0m"
 fi
 
@@ -152,18 +153,17 @@ then
     echo "$BACKUP/themes/ exists"
     echo 
     echo -e "\e[32mAll files are backed up.\e[0m"
-    sudo -u www-data php $NCPATH/occ maintenance:mode --on
+    service apache stop
     echo "Removing old $CLOUD instance in 5 seconds..." && sleep 5
     rm -rf $NCPATH
     tar -xjf $HTML/$CLOUD-$NCVERSION.tar.bz2 -C $HTML
     rm $HTML/$CLOUD-$NCVERSION.tar.bz2
     cp -R $BACKUP/config $NCPATH/
-    if [ -d $BACKUP/data/ ]
+    if [ -d $BACKUP/data ]
     then
-    mv $BACKUP/data/ $DATAFOLDER
+    mv $BACKUP/data NCPATH/
     fi
     bash $SECURE
-    sudo -u www-data php $NCPATH/occ maintenance:mode --off
     sudo -u www-data php $NCPATH/occ upgrade
 else
     echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if the folders exist."
@@ -210,6 +210,7 @@ then
     sudo -u www-data php $NCPATH/occ status
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
     echo
+    echo "Don't forget to start Apache"
     echo "Thank you for using Tech and Me's updater!"
     ## Un-hash this if you want the system to reboot
     # reboot
