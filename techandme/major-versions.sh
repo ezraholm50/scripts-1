@@ -16,6 +16,7 @@ read NCVERSION
 # Directories
 HTML=/var/www
 NCPATH=$HTML/$CLOUD
+DATAFOLDER=$NCPATH/data
 BACKUP=/var/CLOUD_BACKUP
 SCRIPTS=/var/scripts
 
@@ -79,7 +80,6 @@ echo "Press CTRL+C to abort."
 sleep 10
 
 # Backup data
-DATAFOLDER=$NCPATH/data
 echo
 echo "We will now backup the config files, themes folder, and apps folder of $CLOUD to $BACKUP."
 echo "We will also move the $DATAFOLDER to $BACKUP/data if it exists."
@@ -166,8 +166,9 @@ then
     mv $BACKUP/data/* $DATAFOLDER
     sed -i "s|/var/ocdata|/var/data|g" $SECURE
     fi
-    bash $SECURE
+    chown www-data:www-data $NCPATH -R
     sudo -u www-data php $NCPATH/occ upgrade
+    bash $SECURE
 else
     echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if the folders exist."
     exit 1
