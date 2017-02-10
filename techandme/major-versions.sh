@@ -46,7 +46,7 @@ fi
 
 # Upgrade $CLOUD
 echo "Checking latest released version on the download server and if it's possible to download..."
-wget -q -T 10 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
+wget -q -T 5 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\e[32mSUCCESS!\e[0m"
 else
@@ -80,6 +80,7 @@ sleep 10
 
 # Backup data
 DATAFOLDER=$NCPATH/data
+echo
 echo "We will now backup the config files, themes folder, and apps folder of $CLOUD to $BACKUP."
 echo "We will also move the $DATAFOLDER to $BACKUP/data if it exists."
 echo "If the data folder is not in $DATAFOLDER but still in root of $CLOUD - **PLEASE MOVE IT NOW** -"
@@ -112,7 +113,7 @@ else
     echo "Backup OK!"
     echo -e "\e[0m"
 fi
-wget $NCREPO/$CLOUD-$NCVERSION.tar.bz2 -P $HTML
+wget -q -T 5 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 -P $HTML
 
 if [ -f $HTML/$CLOUD-$NCVERSION.tar.bz2 ]
 then
