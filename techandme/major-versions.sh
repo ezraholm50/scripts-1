@@ -46,7 +46,7 @@ fi
 
 # Upgrade $CLOUD
 echo "Checking latest released version on the download server and if it's possible to download..."
-curl -s --max-time 900 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
+wget -q -T 10 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\e[32mSUCCESS!\e[0m"
 else
