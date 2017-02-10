@@ -99,7 +99,7 @@ fi
   if [ -d $DATAFOLDER ]
   then
   mkdir -p $BACKUP/data
-  mv $DATAFOLDER $BACKUP/data
+  mv $DATAFOLDER/* $BACKUP/data
   fi
 rsync -Aax $NCPATH/config $BACKUP
 rsync -Aax $NCPATH/themes $BACKUP
@@ -162,7 +162,8 @@ then
     cp -R $BACKUP/config $NCPATH/
     if [ -d $BACKUP/data ]
     then
-    mv $BACKUP/data NCPATH/
+    mv $BACKUP/data/* $DATAFOLDER
+    sed -i "s|/var/ocdata|/var/data|g" $SCRIPTS/setup-secure-permissions-$CLOUD.sh
     fi
     bash $SECURE
     sudo -u www-data php $NCPATH/occ upgrade
