@@ -9,22 +9,27 @@
 THEME_NAME=""
 
 # ownCloud or nextcloud file?
+echo
 echo "Is this for owncloud or nextcloud?"
-echo "Please use exact name and small letters"
-read CLOUD
+echo "Please use exact name and small letters."
+echo "I use:" && read CLOUD
 
 if [ $CLOUD == "nextcloud" ]
 then
-sed "s|https://download.owncloud.org/community/|https://download.nextcloud.com/releases/|g"
-sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloudvm/master/static|g"
-sed "s|https://github.com/nextcloud/vm/issues|https://github.com/techandme/owncloud-vm/issues|g"
+sed "s|https://download.owncloud.org/community/|https://download.nextcloud.com/releases/|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloudvm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 fi
+if [ $CLOUD == "owncloud" ]
+then
+sed "s|https://github.com/nextcloud/vm/issues|https://github.com/enoch85/scripts/issues|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+fi
+
 
 # Directories
 HTML=/var/www
 NCPATH=$HTML/$CLOUD
 SCRIPTS=/var/scripts
-BACKUP=/var/OCBACKUP
+BACKUP=/var/CLOUD_BACKUP
 #Static Values
 STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
 NCREPO="https://download.owncloud.org/community/"
