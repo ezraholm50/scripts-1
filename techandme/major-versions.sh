@@ -5,31 +5,36 @@
 # Tested on Ubuntu Server 16.04.
 #
 
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
-
 # Put your theme name here:
 THEME_NAME=""
 
+# ownCloud or nextcloud file?
+echo "Is this for owncloud or nextcloud?"
+echo "Please use exact name and small letters"
+read CLOUD
+
+if [ $CLOUD == "nextcloud" ]
+then
+sed "s|https://download.owncloud.org/community/|https://download.nextcloud.com/releases/|g"
+sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloudvm/master/static|g"
+sed "s|https://github.com/nextcloud/vm/issues|https://github.com/techandme/owncloud-vm/issues|g"
+fi
+
 # Directories
 HTML=/var/www
-NCPATH=$HTML/owncloud
+NCPATH=$HTML/$CLOUD
 SCRIPTS=/var/scripts
 BACKUP=/var/OCBACKUP
 #Static Values
 STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
 NCREPO="https://download.owncloud.org/community/"
-SECURE="$SCRIPTS/setup_secure_permissions_nextcloud.sh"
+SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
 # Versions
 CURRENTVERSION=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
-NCVERSION=8.0.16
+
 
 # Must be root
 [[ `id -u` -eq 0 ]] || { echo "Must be root to run script, in Ubuntu type: sudo -i"; exit 1; }
-
-# System Upgrade
-apt update
-export DEBIAN_FRONTEND=noninteractive ; apt dist-upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
-rm /var/lib/apt/lists/* -R
 
 # Set secure permissions
 FILE="$SECURE"
@@ -38,22 +43,33 @@ then
     echo "Script exists"
 else
     mkdir -p $SCRIPTS
-    wget -q $STATIC/setup_secure_permissions_nextcloud.sh -P $SCRIPTS
+    wget -q $STATIC/setup_secure_permissions_$CLOUD.sh -P $SCRIPTS
     chmod +x $SECURE
 fi
 
-# Upgrade Cloud
+# Wich version?
+echo "Which version do you wan to upgrade to?"
+echo "Example: 8.0.16"
+read NCVERSION
+
+# Upgrade $CLOUD
 echo "Checking latest released version on the download server and if it's possible to download..."
-curl -s --max-time 900 $NCREPO/owncloud-$NCVERSION.tar.bz2 > /dev/null
+curl -s --max-time 900 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
 if [ $? -eq 0 ]; then
     echo -e "\e[32mSUCCESS!\e[0m"
 else
     echo
-    echo -e "\e[91mNextcloud $NCVERSION doesn't exist.\e[0m"
+    echo -e "\e[91m$CLOUD $NCVERSION doesn't exist.\e[0m"
     echo "Please check available versions here: $NCREPO"
     echo
     exit 1
 fi
+
+# Disable apps
+echo "Please disable all 3d party apps like contacts, calendar and such."
+echo -e "\e[32m"
+read -p "Press any key when all apps are disbaled..." -n1 -s
+echo -e "\e[0m"
 
 # Check if new version is larger than current version installed.
 function version_gt() { local v1 v2 IFS=.; read -ra v1 <<< "$1"; read -ra v2 <<< "$2"; printf -v v1 %03d "${v1[@]}"; printf -v v2 %03d "${v2[@]}"; [[ $v1 > $v2 ]]; }
@@ -92,11 +108,11 @@ else
     echo "Backup OK!"
     echo -e "\e[0m"
 fi
-wget $NCREPO/owncloud-$NCVERSION.tar.bz2 -P $HTML
+wget $NCREPO/$CLOUD-$NCVERSION.tar.bz2 -P $HTML
 
-if [ -f $HTML/owncloud-$NCVERSION.tar.bz2 ]
+if [ -f $HTML/$CLOUD-$NCVERSION.tar.bz2 ]
 then
-    echo "$HTML/owncloud-$NCVERSION.tar.bz2 exists"
+    echo "$HTML/$CLOUD-$NCVERSION.tar.bz2 exists"
 else
     echo "Aborting,something went wrong with the download"
     exit 1
@@ -106,7 +122,7 @@ if [ -d $BACKUP/config/ ]
 then
     echo "$BACKUP/config/ exists"
 else
-    echo "Something went wrong with backing up your old nextcloud instance, please check in $BACKUP if config/ folder exist."
+    echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if config/ folder exist."
     exit 1
 fi
 
@@ -114,7 +130,7 @@ if [ -d $BACKUP/apps/ ]
 then
     echo "$BACKUP/apps/ exists"
 else
-    echo "Something went wrong with backing up your old nextcloud instance, please check in $BACKUP if apps/ folder exist."
+    echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if apps/ folder exist."
     exit 1
 fi
 
@@ -124,17 +140,17 @@ then
     echo 
     echo -e "\e[32mAll files are backed up.\e[0m"
     sudo -u www-data php $NCPATH/occ maintenance:mode --on
-    echo "Removing old Nextcloud instance in 5 seconds..." && sleep 5
+    echo "Removing old $CLOUD instance in 5 seconds..." && sleep 5
     rm -rf $NCPATH
-    tar -xjf $HTML/owncloud-$NCVERSION.tar.bz2 -C $HTML
-    rm $HTML/owncloud-$NCVERSION.tar.bz2
+    tar -xjf $HTML/$CLOUD-$NCVERSION.tar.bz2 -C $HTML
+    rm $HTML/$CLOUD-$NCVERSION.tar.bz2
     cp -R $BACKUP/themes $NCPATH/
     cp -R $BACKUP/config $NCPATH/
     bash $SECURE
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
     sudo -u www-data php $NCPATH/occ upgrade
 else
-    echo "Something went wrong with backing up your old nextcloud instance, please check in $BACKUP if the folders exist."
+    echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if the folders exist."
     exit 1
 fi
 
@@ -174,7 +190,7 @@ then
     echo
     echo "Latest version is: $NCVERSION. Current version is: $CURRENTVERSION_after."
     echo "UPGRADE SUCCESS!"
-    echo "NEXTCLOUD UPDATE success-`date +"%Y%m%d"`" >> /var/log/cronjobs_success.log
+    echo "$CLOUD UPDATE success-`date +"%Y%m%d"`" >> /var/log/cronjobs_success.log
     sudo -u www-data php $NCPATH/occ status
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
     echo
