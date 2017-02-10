@@ -45,6 +45,13 @@ else
     chmod +x $SECURE
 fi
 
+# Set permissions
+chown -R www-data:www-data $NCPATH
+
+# Enter maintanance mode
+sudo -u www-data php $NCPATH/occ maintenance:mode --on
+echo
+
 # Upgrade $CLOUD
 echo "Checking latest released version on the download server and if it's possible to download..."
 wget -q -T 5 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 > /dev/null
@@ -155,7 +162,7 @@ then
     echo "$BACKUP/themes/ exists"
     echo 
     echo -e "\e[32mAll files are backed up.\e[0m"
-    service apache stop
+    service apache2 stop
     echo "Removing old $CLOUD instance in 5 seconds..." && sleep 5
     rm -rf $NCPATH
     tar -xjf $HTML/$CLOUD-$NCVERSION.tar.bz2 -C $HTML
@@ -166,9 +173,8 @@ then
     mv $BACKUP/data/* $DATAFOLDER
     sed -i "s|/var/ocdata|/var/data|g" $SECURE
     fi
-    chown www-data:www-data $NCPATH -R
+    chown -R www-data:www-data $NCPATH
     sudo -u www-data php $NCPATH/occ upgrade
-    bash $SECURE
 else
     echo "Something went wrong with backing up your old $CLOUD instance, please check in $BACKUP if the folders exist."
     exit 1
@@ -189,10 +195,8 @@ fi
 
 # Pretty URLs
 echo "Setting RewriteBase to "/" in config.php..."
-chown -R www-data:www-data $NCPATH
 sudo -u www-data php $NCPATH/occ config:system:set htaccess.RewriteBase --value="/"
 sudo -u www-data php $NCPATH/occ maintenance:update:htaccess
-bash $SECURE
 
 # Repair
 sudo -u www-data php $NCPATH/occ maintenance:repair
@@ -214,7 +218,6 @@ then
     sudo -u www-data php $NCPATH/occ status
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
     echo
-    echo "Don't forget to start Apache"
     echo "Thank you for using Tech and Me's updater!"
     ## Un-hash this if you want the system to reboot
     # reboot
@@ -228,3 +231,5 @@ else
     echo "Please report this issue to https://github.com/nextcloud/vm/issues"
     exit 1
 fi
+
+bash $SECURE
