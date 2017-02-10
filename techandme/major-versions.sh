@@ -4,24 +4,7 @@
 #
 # Tested on Ubuntu Server 16.04.
 #
-
-#---------------------------------------------------------------------------------------------------#
-# Put your theme name here:
-THEME_NAME=""
-
-# Directories
-HTML=/var/www
-NCPATH=$HTML/$CLOUD
-BACKUP=/var/CLOUD_BACKUP
 SCRIPTS=/var/scripts
-#Static Values
-STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
-NCREPO="https://download.owncloud.org/community/"
-SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
-# Versions
-CURRENTVERSION=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
-#---------------------------------------------------------------------------------------------------#
-
 mkdir -p $SCRIPTS
 
 # ownCloud or nextcloud file?
@@ -39,6 +22,23 @@ if [ $CLOUD == "owncloud" ]
 then
 sed "s|https://github.com/nextcloud/vm/issues|https://github.com/enoch85/scripts/issues|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 fi
+
+#---------------------------------------------------------------------------------------------------#
+# Put your theme name here:
+THEME_NAME=""
+
+# Directories
+HTML=/var/www
+NCPATH=$HTML/$CLOUD
+BACKUP=/var/CLOUD_BACKUP
+
+#Static Values
+STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
+NCREPO="https://download.owncloud.org/community/"
+SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
+# Versions
+CURRENTVERSION=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
+#---------------------------------------------------------------------------------------------------#
 
 # Must be root
 [[ `id -u` -eq 0 ]] || { echo "Must be root to run script, in Ubuntu type: sudo -i"; exit 1; }
