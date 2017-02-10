@@ -95,15 +95,25 @@ echo "Press CTRL+C to abort."
 sleep 10
 
 # Backup data
-echo "Backing up data..."
+DATAFOLDER=$NCPATH/data
+echo "We will now backup the config files, themes folder, and apps folder of $CLOUD to $BACKUP."
+echo "We will also move the $DATAFOLDER to $BACKUP/data if it exists."
+echo "If the data folder is not in $DATAFOLDER but still in root of $CLOUD - **PLEASE MOVE IT NOW** We will delete $NCPATH/* in the next step."
+echo -e "\e[32m"
+read -p "Press any key when the data is moved outside of $NCPATH root..." -n1 -s
+echo -e "\e[0m"
 DATE=`date +%Y-%m-%d-%H%M%S`
 if [ -d $BACKUP ]
 then
-    mkdir -p /var/NCBACKUP_OLD/$DATE
-    mv $BACKUP/* /var/NCBACKUP_OLD/$DATE
+    mkdir -p /var/CLOUDBACKUP_OLD/$DATE
+    mv $BACKUP/* /var/CLOUDBACKUP_OLD/$DATE
     rm -R $BACKUP
     mkdir -p $BACKUP
 fi
+  if [ -d $DATAFOLDER ]
+  then
+  mv $DATAFOLDER $BACKUP/data
+  fi
 rsync -Aax $NCPATH/config $BACKUP
 rsync -Aax $NCPATH/themes $BACKUP
 rsync -Aax $NCPATH/apps $BACKUP
@@ -142,6 +152,16 @@ else
     exit 1
 fi
 
+if [ -d $BACKUP/data/ ]
+then
+    echo "$BACKUP/data/ exists"
+else
+    echo "We could not find $BACKUP/data/ are you sure you moved it outside $NCPATH?"
+    echo -e "\e[32m"
+    read -p "Press any key if you moved your $CLOUD data away from $NCPATH." -n1 -s
+    echo -e "\e[0m"
+fi
+
 if [ -d $BACKUP/themes/ ]
 then
     echo "$BACKUP/themes/ exists"
@@ -152,8 +172,11 @@ then
     rm -rf $NCPATH
     tar -xjf $HTML/$CLOUD-$NCVERSION.tar.bz2 -C $HTML
     rm $HTML/$CLOUD-$NCVERSION.tar.bz2
-    cp -R $BACKUP/themes $NCPATH/
     cp -R $BACKUP/config $NCPATH/
+    if [ -d $BACKUP/data/ ]
+    then
+    mv $BACKUP/data/ $DATAFOLDER
+    fi
     bash $SECURE
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
     sudo -u www-data php $NCPATH/occ upgrade
