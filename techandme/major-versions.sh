@@ -98,8 +98,8 @@ echo -e "\e[0m"
 DATE=`date +%Y-%m-%d-%H%M%S`
 if [ -d $BACKUP ]
 then
-    mkdir -p /var/CLOUDBACKUP_OLD/$DATE
-    mv $BACKUP/* /var/CLOUDBACKUP_OLD/$DATE
+    mkdir -p /var/CLOUDBACKUP_OLD_$CURRENTVERSION/$DATE
+    mv $BACKUP/* /var/CLOUDBACKUP_OLD_$CURRENTVERSION/$DATE
     rm -R $BACKUP
     mkdir -p $BACKUP
 fi
@@ -170,6 +170,7 @@ then
     cp -R $BACKUP/config $NCPATH/
     if [ -d $BACKUP/data ]
     then
+    mkdir -p $DATAFOLDER
     mv $BACKUP/data/* $DATAFOLDER
     sed -i "s|/var/ocdata|/var/data|g" $SECURE
     fi
@@ -217,6 +218,7 @@ then
     echo "$CLOUD UPDATE success-`date +"%Y%m%d"`" >> /var/log/cronjobs_success.log
     sudo -u www-data php $NCPATH/occ status
     sudo -u www-data php $NCPATH/occ maintenance:mode --off
+    echo "Apache2 is not started yet. Please check config.php that everything checks out."
     echo
     echo "Thank you for using Tech and Me's updater!"
     ## Un-hash this if you want the system to reboot
