@@ -60,7 +60,7 @@ if [ $? -eq 0 ]; then
 else
     echo
     echo -e "\e[91m$CLOUD $NCVERSION doesn't exist.\e[0m"
-    echo "Please check available versions here: $NCREPO"
+    echo "Please check available versions here: https://download.owncloud.org/download/repositories"
     echo
     exit 1
 fi
@@ -107,6 +107,13 @@ fi
   then
   mkdir -p $BACKUP/data
   mv $DATAFOLDER/* $BACKUP/data
+  fi
+  if [[ $? > 0 ]]
+  then 
+  echo "DATA OK!"
+  else
+  echo "DATA NOT OK! Please check if it exists in $BACKUP" 
+  exit 1
   fi
 rsync -Aax $NCPATH/config $BACKUP
 rsync -Aax $NCPATH/themes $BACKUP
