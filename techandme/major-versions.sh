@@ -113,6 +113,7 @@ else
     echo "Backup OK!"
     echo -e "\e[0m"
 fi
+echo "Getting $NCVERSION from the download server..."
 wget -q -T 5 -t 2 $NCREPO/$CLOUD-$NCVERSION.tar.bz2 -P $HTML
 
 if [ -f $HTML/$CLOUD-$NCVERSION.tar.bz2 ]
@@ -163,7 +164,7 @@ then
     if [ -d $BACKUP/data ]
     then
     mv $BACKUP/data/* $DATAFOLDER
-    sed -i "s|/var/ocdata|/var/data|g" $SCRIPTS/setup-secure-permissions-$CLOUD.sh
+    sed -i "s|/var/ocdata|/var/data|g" $SECURE
     fi
     bash $SECURE
     sudo -u www-data php $NCPATH/occ upgrade
