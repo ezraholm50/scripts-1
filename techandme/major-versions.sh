@@ -16,11 +16,9 @@ read CLOUD
 
 if [ $CLOUD == "nextcloud" ]
 then
-sed "s|https://download.owncloud.org/community/|https://download.nextcloud.com/releases/|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
+sed "s|https://download.owncloud.org/community|https://download.nextcloud.com/releases|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 sed "s|https://raw.githubusercontent.com/techandme-vm/master/static|https://raw.githubusercontent.com/nextcloud/vm/master/static|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
-fi
-if [ $CLOUD == "owncloud" ]
-then
+else
 sed "s|https://github.com/nextcloud/vm/issues|https://github.com/enoch85/scripts/issues|g" $SCRIPTS/major-versions.sh > testfile.tmp && mv testfile.tmp $SCRIPTS/major-versions.sh
 fi
 
@@ -35,7 +33,7 @@ BACKUP=/var/CLOUD_BACKUP
 
 #Static Values
 STATIC="https://raw.githubusercontent.com/techandme-vm/master/static"
-NCREPO="https://download.owncloud.org/community/"
+NCREPO="https://download.owncloud.org/community"
 SECURE="$SCRIPTS/setup_secure_permissions_$CLOUD.sh"
 # Versions
 CURRENTVERSION=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
