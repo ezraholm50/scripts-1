@@ -13,6 +13,11 @@ echo "Which version do you wan to upgrade to?"
 echo "Example: 8.2.10"
 read NCVERSION
 
+# Wich version?
+echo "Enter one of the usernames in the cloud"
+echo "Example: Administrator"
+read CLOUDUSERNAME
+
 # Directories
 HTML=/var/www
 NCPATH=$HTML/$CLOUD
@@ -154,11 +159,11 @@ else
     exit 1
 fi
 
-if [ -d $BACKUP/data ]
+if [ -d $BACKUP/data/$CLOUDUSERNAME ]
 then
-    echo "$BACKUP/data exists"
+    echo "$BACKUP/data/$CLOUDUSERNAME exists"
 else
-    echo "We could not find $BACKUP/data are you sure you moved your data folder outside $NCPATH?"
+    echo "We could not find $BACKUP/data/$CLOUDUSERNAME are you sure you moved your data folder outside $NCPATH?"
     echo -e "\e[32m"
     read -p "Press any key if you moved your $CLOUD data away from $NCPATH. Press CTRL+C to abort." -n1 -s
     echo -e "\e[0m"
@@ -208,13 +213,6 @@ sudo -u www-data php $NCPATH/occ maintenance:update:htaccess
 
 # Repair
 sudo -u www-data php $NCPATH/occ maintenance:repair
-
-# Cleanup un-used packages
-apt autoremove -y
-apt autoclean
-
-# Update GRUB, just in case
-update-grub
 
 CURRENTVERSION_after=$(sudo -u www-data php $NCPATH/occ status | grep "versionstring" | awk '{print $3}')
 if [[ "$NCVERSION" == "$CURRENTVERSION_after" ]]
