@@ -98,8 +98,8 @@ echo -e "\e[0m"
 DATE=`date +%Y-%m-%d-%H%M%S`
 if [ -d $BACKUP ]
 then
-    mkdir -p /var/CLOUDBACKUP_OLD_$CURRENTVERSION/$DATE
-    mv $BACKUP/* /var/CLOUDBACKUP_OLD_$CURRENTVERSION/$DATE
+    mkdir -p /var/CLOUDBACKUP_OLD/$CURRENTVERSION_$DATE
+    mv $BACKUP/* /var/CLOUDBACKUP_OLD/$CURRENTVERSION_$DATE
     rm -R $BACKUP
     mkdir -p $BACKUP
 fi
