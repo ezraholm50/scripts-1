@@ -214,6 +214,7 @@ else
 fi
 
 # Install letsencrypt
+apt update -q2
 letsencrypt --version 2> /dev/null
 LE_IS_AVAILABLE=$?
 if [ $LE_IS_AVAILABLE -eq 0 ]
@@ -228,7 +229,7 @@ fi
 
 # Let's Encrypt
 echo "Generating SSL certificate..."
-letsencrypt-auto certonly \
+letsencrypt certonly \
 --webroot --webroot-path /usr/share/nginx/html/ \
 --rsa-key-size 4096 \
 --renew-by-default --email $EMAIL \
