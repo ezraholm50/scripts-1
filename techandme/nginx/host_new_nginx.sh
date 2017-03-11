@@ -213,21 +213,24 @@ else
         openssl dhparam -out $DHPARAMS 4096
 fi
 
+# Install letsencrypt
+letsencrypt --version 2> /dev/null
+LE_IS_AVAILABLE=$?
+if [ $LE_IS_AVAILABLE -eq 0 ]
+then
+    certbot --version
+else
+    echo "Installing letsencrypt..."
+    add-apt-repository ppa:certbot/certbot -y
+    apt update -q2
+    apt install letsencrypt -y -q
+fi
+
 # Let's Encrypt
 echo "Generating SSL certificate..."
-service nginx stop
-bash /opt/letsencrypt/letsencrypt-auto certonly --standalone -d $URL
-if [[ $? -eq 0 ]]
-then 
-sleep 1
-service nginx start
-else
-rm /etc/nginx/sites-enabled/$DOMAIN.conf
-service nginx start
-fi
-cd /opt/letsencrypt/letsencrypt-auto-source
-./letsencrypt-auto certonly \
+letsencrypt-auto certonly \
 --webroot --webroot-path /usr/share/nginx/html/ \
+--rsa-key-size 4096 \
 --renew-by-default --email $EMAIL \
 --text \
 --agree-tos \
@@ -244,23 +247,20 @@ else
 fi
 
 cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
+DATE='$(date +%Y-%m-%d_%H:%M)'
+IF='if [[ $? -eq 0 ]]'
+cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
 #!/bin/sh
-service nginx stop
-if ! /opt/letsencrypt/letsencrypt-auto renew > /var/log/letsencrypt/renew.log 2>&1 ; then
-        echo Automated renewal failed:
-        cat /var/log/letsencrypt/renew.log
-        exit 1
-fi
-service nginx start
-if [[ $? -eq 0 ]]
+letsencrypt renew >> /var/log/letsencrypt/renew.log
+$IF
 then
-        echo "Let's Encrypt SUCCESS!"--date+%Y-%m-%d_%H:%M" >> /var/log/letsencrypt/cronjob.log
+        echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
 else
-        echo "Let's Encrypt FAILED!"--date+%Y-%m-%d_%H:%M" >> /var/log/letsencrypt/cronjob.log
+        echo "Let's Encrypt FAILED!"--$DATE >> /var/log/letsencrypt/cronjob.log
         reboot
 fi
-
 CRONTAB
+
 
 chmod +x $SCRIPTS/letsencryptrenew.sh
 
