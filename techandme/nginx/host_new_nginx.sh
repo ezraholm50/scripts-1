@@ -169,6 +169,10 @@ else
         server_name $URL;
         set $upstream $APACHEHOSTIP:$APACHEPORT;
 
+        location /.well-known {
+                root /usr/share/nginx/html;
+        }
+
         location / {
                 proxy_pass_header Authorization;
                 proxy_pass http://$upstream;
