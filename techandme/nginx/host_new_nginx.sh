@@ -244,10 +244,8 @@ if [[ $? -eq 0 ]]
 then
 	echo "Let's Encrypt SUCCESS!"
 	crontab -u root -l | { cat; echo "@weekly $SCRIPTS/letsencryptrenew.sh"; } | crontab -u root -
-	service nginx start
 else
 	echo "Let's Encypt failed"
-	service nginx start
 	exit 1
 fi
 
@@ -276,6 +274,7 @@ then
 	bash $CFDIR/$HOSTNAME/cloudflare-new-ip.sh
 	# Put the conf in new_ip_cloudflare.sh
 	sed -i "1s|^|bash $CFDIR/$HOSTNAME/cloudflare-new-ip.sh\n|" $SCRIPTS/new_ip_cloudflare.sh
+	rm /etc/nginx/sites-enabled/$DOMAIN.conf
 	ln -s /etc/nginx/sites-available/$DOMAIN.conf /etc/nginx/sites-enabled/$DOMAIN.conf
 	service nginx restart
 	echo
