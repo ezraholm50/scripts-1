@@ -249,7 +249,6 @@ else
 	exit 1
 fi
 
-cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
 DATE='$(date +%Y-%m-%d_%H:%M)'
 IF='if [[ $? -eq 0 ]]'
 cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
@@ -260,10 +259,8 @@ then
         echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
 else
         echo "Let's Encrypt FAILED!"--$DATE >> /var/log/letsencrypt/cronjob.log
-        reboot
 fi
 CRONTAB
-
 
 chmod +x $SCRIPTS/letsencryptrenew.sh
 
