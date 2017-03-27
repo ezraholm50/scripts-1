@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Tech and Me - ©2017, https://www.techandme.se/
+# Author: https://github.com/enoch85
+
+
 currentdate=$(date +%Y-%m-%d_%H:%M)
 backupdir=/mnt/RAID10/cfgbackup
 backupname=config_backup_$currentdate
