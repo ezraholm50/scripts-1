@@ -11,6 +11,17 @@ backupdir=/mnt/RAID10/cfgbackup
 backupname=config_backup_$currentdate
 keepfilesfordays=30
 
+# Check if DIRs exist
+if ! [ -d $backupdir ]
+then
+    mkdir -p $backupdir
+fi
+
+if ! [ -d $backupdir/config ]
+then
+    mkdir -p $backupdir/config
+fi
+
 # Do the backup and log on error or success
 if cli -e "system config download path=$backupdir/$backupname"; then
    echo "Backup success $currentdate" >> $backupdir/config/log
