@@ -3,6 +3,9 @@
 # Tech and Me - ©2017, https://www.techandme.se/
 # Author: https://github.com/enoch85
 
+# To restore your config from the file produced in this script, go to System --> Preferences --> Browse and add this file.
+# Please note that FreeNAS will reboot after you press OK! Shut down all VMs that are running before you restore anything.
+
 currentdate=$(date +%Y-%m-%d_%H:%M)
 backupdir=/mnt/RAID10/cfgbackup
 backupname=config_backup_$currentdate
