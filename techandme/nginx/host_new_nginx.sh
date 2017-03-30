@@ -7,7 +7,6 @@
 
 # Requirements:
 # 1. Ubuntu 16.04 with Nginx pre-installed (sudo apt-get install nginx -y)
-# 2. Let's Encrypt
 
 # Check for errors + debug code and abort if something isn't right
 # 1 = ON
@@ -89,7 +88,6 @@ else
         mkdir $CFDIR
 fi
 mkdir $CFDIR/$HOSTNAME
-
 
 # cloudflare-new-ip.sh
 if [ -f $CFDIR/$HOSTNAME/cloudflare-new-ip.sh ];
