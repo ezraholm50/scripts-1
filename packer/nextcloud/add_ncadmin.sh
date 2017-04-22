@@ -8,9 +8,9 @@ if id "$UNIXUSER" >/dev/null 2>&1
 then
         echo "$UNIXUSER already exists!"
 else
-        adduser --disabled-password --gecos "" $UNIXUSER
-        echo -e "$UNIXUSER:$UNIXPASS" | chpasswd
-        usermod -aG sudo $UNIXUSER
+        sudo adduser --disabled-password --gecos "" $UNIXUSER
+        sudo echo -e "$UNIXUSER:$UNIXPASS" | chpasswd
+        sudo usermod -aG sudo $UNIXUSER
 fi
 
 if [ -d /home/$UNIXUSER ];
