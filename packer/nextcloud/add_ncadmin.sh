@@ -9,7 +9,7 @@ then
         echo "$UNIXUSER already exists!"
 else
         sudo adduser --disabled-password --gecos "" $UNIXUSER
-        sudo echo -e "$UNIXUSER:$UNIXPASS" | chpasswd
+        echo -e "$UNIXUSER:$UNIXPASS" | sudo chpasswd
         sudo usermod -aG sudo $UNIXUSER
 fi
 
