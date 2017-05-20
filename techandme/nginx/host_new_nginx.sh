@@ -207,16 +207,9 @@ sed -i "s|proxy_pass http://|proxy_pass https://|g" $CFDIR/$HOSTNAME/nginx-$DOMA
 sed -i "s|proxy_ssl_session_reuse on|proxy_ssl_session_reuse off|g" $CFDIR/$HOSTNAME/nginx-$DOMAIN-after
 fi
 
-# Generate DHparams chifer
-if [ -f $DHPARAMS ];
-        then
-        echo "$DHPARAMS exists"
-else
-        openssl dhparam -out $DHPARAMS 4096
-fi
-
 # Install letsencrypt
 apt update -q2
+apt upgrade -y
 letsencrypt --version 2> /dev/null
 LE_IS_AVAILABLE=$?
 if [ $LE_IS_AVAILABLE -eq 0 ]
@@ -225,13 +218,43 @@ then
 else
     echo "Installing letsencrypt..."
     add-apt-repository ppa:certbot/certbot -y
-    apt update -q2
+    apt update -q4
     apt install letsencrypt -y -q
+    apt update -q4
+    apt dist-upgrade -y
 fi
 
-# Let's Encrypt
-echo "Generating SSL certificate..."
-letsencrypt certonly \
+# Generate DHparams chifer
+if [ -f $DHPARAMS ];
+then
+    echo "$DHPARAMS exists"
+else
+    openssl dhparam -dsaparam -out "$DHPARAMS" 8192
+fi
+
+# Lets Encrypt standalone (webroot doesn't work at first)
+service nginx stop
+echo "Generating standalone SSL certificate..."
+certbot certonly \
+--standalone \
+--rsa-key-size 4096 \
+--renew-by-default --email $EMAIL \
+--text \
+--agree-tos \
+-d $URL
+if [[ $? -eq 0 ]]
+then
+	echo "Let's Encrypt standalone SUCCESS!"
+        nginx service start
+else
+	echo "Let's Encypt standalone failed"
+	nginx service start
+	exit 1
+fi
+
+# Let's Encrypt webroot
+echo "Generating webroot SSL certificate..."
+certbot certonly \
 --webroot --webroot-path /usr/share/nginx/html/ \
 --rsa-key-size 4096 \
 --renew-by-default --email $EMAIL \
@@ -240,27 +263,11 @@ letsencrypt certonly \
 -d $URL
 if [[ $? -eq 0 ]]
 then
-	echo "Let's Encrypt SUCCESS!"
-	crontab -u root -l | { cat; echo "@weekly $SCRIPTS/letsencryptrenew.sh"; } | crontab -u root -
+	echo "Let's Encrypt webroot SUCCESS"
 else
-	echo "Let's Encypt failed"
+	echo "Let's Encypt webroot failed"
 	exit 1
 fi
-
-DATE='$(date +%Y-%m-%d_%H:%M)'
-IF='if [[ $? -eq 0 ]]'
-cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
-#!/bin/sh
-letsencrypt renew >> /var/log/letsencrypt/renew.log
-$IF
-then
-        echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
-else
-        echo "Let's Encrypt FAILED!"--$DATE >> /var/log/letsencrypt/cronjob.log
-fi
-CRONTAB
-
-chmod +x $SCRIPTS/letsencryptrenew.sh
 
 # Enable host
 service nginx configtest
@@ -280,3 +287,22 @@ else
         sleep 5
 	exit 1
 fi
+
+# Cronjob for Lets Encrypt
+echo "Adding cronjob for Lets Encrypt in 10 seconds, press CTRL-C to abort."
+sleep 10
+crontab -u root -l | { cat; echo "@weekly $SCRIPTS/letsencryptrenew.sh"; } | crontab -u root -
+DATE='$(date +%Y-%m-%d_%H:%M)'
+IF='if [[ $? -eq 0 ]]'
+cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
+#!/bin/sh
+letsencrypt renew >> /var/log/letsencrypt/renew.log
+$IF
+then
+        echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
+else
+        echo "Let's Encrypt FAILED!"--$DATE >> /var/log/letsencrypt/cronjob.log
+fi
+CRONTAB
+
+chmod +x $SCRIPTS/letsencryptrenew.sh
