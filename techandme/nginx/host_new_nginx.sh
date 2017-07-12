@@ -248,7 +248,8 @@ then
         service nginx start
 else
 	echo "Let's Encypt standalone failed"
-	bash $SCRIPTS/remove_domain.sh
+	# bash $SCRIPTS/remove_domain.sh
+	rm /etc/nginx/sites-enabled/$DOMAIN.conf
 	service nginx start
 	exit 1
 fi
