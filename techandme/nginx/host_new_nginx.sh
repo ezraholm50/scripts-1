@@ -245,11 +245,11 @@ certbot certonly \
 if [[ $? -eq 0 ]]
 then
 	echo "Let's Encrypt standalone SUCCESS!"
-        nginx service start
+        service nginx start
 else
 	echo "Let's Encypt standalone failed"
 	bash $SCRIPTS/remove_domain.sh
-	nginx service start
+	service nginx start
 	exit 1
 fi
 
