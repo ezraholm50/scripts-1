@@ -295,15 +295,12 @@ echo "Adding cronjob for Lets Encrypt in 10 seconds, press CTRL-C to abort."
 sleep 10
 crontab -u root -l | { cat; echo "@weekly $SCRIPTS/letsencryptrenew.sh"; } | crontab -u root -
 DATE='$(date +%Y-%m-%d_%H:%M)'
-IF='if [[ $? -eq 0 ]]'
 cat << CRONTAB > "$SCRIPTS/letsencryptrenew.sh"
 #!/bin/sh
-letsencrypt renew >> /var/log/letsencrypt/renew.log
-$IF
-then
-        echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
-else
+if ! certbot renew --quiet --no-self-upgrade > /var/log/letsencrypt/renew.log 2>&1 ; then
         echo "Let's Encrypt FAILED!"--$DATE >> /var/log/letsencrypt/cronjob.log
+else
+        echo "Let's Encrypt SUCCESS!"--$DATE >> /var/log/letsencrypt/cronjob.log
 fi
 CRONTAB
 
