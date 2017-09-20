@@ -233,10 +233,10 @@ else
 fi
 
 # Lets Encrypt standalone (webroot doesn't work at first)
-service nginx stop
 echo "Generating standalone SSL certificate..."
 certbot certonly \
 --standalone \
+--pre-hook 'service nginx stop' --post-hook 'service nginx start' \
 --rsa-key-size 4096 \
 --renew-by-default --email $EMAIL \
 --text \
@@ -245,7 +245,6 @@ certbot certonly \
 if [[ $? -eq 0 ]]
 then
 	echo "Let's Encrypt standalone SUCCESS!"
-        service nginx start
 else
 	echo "Let's Encypt standalone failed"
 	# bash $SCRIPTS/remove_domain.sh
