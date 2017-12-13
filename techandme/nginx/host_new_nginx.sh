@@ -64,6 +64,24 @@ request_uri='$request_uri'
 
 ##################################################
 
+ask_yes_or_no() {
+    read -r -p "$1 ([y]es or [N]o): "
+    case ${REPLY,,} in
+        y|yes)
+            echo "yes"
+        ;;
+        *)
+            echo "no"
+        ;;
+    esac
+}
+
+if [[ "no" == $(ask_yes_or_no "Have you changed the email adress variable for SSL, plus all other varibales that needs changing?") ]]
+then
+    echo "OK, please change that and then run the script again."
+    exit
+fi
+
 # Remove dirs for script
 if [ -d $CFDIR/$HOSTNAME ];
 then
